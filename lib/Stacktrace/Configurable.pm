@@ -25,9 +25,8 @@ BEGIN {
     }
 }
 
-sub skip_package_re {
-    qr/^Stacktrace::Configurable/;
-}
+sub skip_package_re {}
+sub skip_package_number {1}
 
 sub default_format {
     ('%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.
@@ -39,7 +38,7 @@ sub default_format {
 sub get_trace {
     my $I=shift;
 
-    my $i=1;
+    my $i=$I->skip_package_number;
     my $skip_re=$I->skip_package_re;
 
     my @trace;
@@ -49,9 +48,10 @@ sub get_trace {
         @DB::args=();
         CORE::caller $i++;
     }) {
-        next if !@trace and $l[0]=~$skip_re;
+        next if !@trace and $skip_re and $l[0]=~$skip_re;
         push @trace, Stacktrace::Configurable::Frame->new(@l, [@DB::args]);
     }
+
     $I->{_stack}=\@trace;
     return $I;
 }
@@ -159,6 +159,7 @@ my %formatter =
          my $fn = $frame->{filename};
          for (split /,\s*/, $param) {
              last if s/^skip_prefix=// and $fn =~ s!^\Q$_\E!!;
+             last if s/^basename$// and $fn =~ s!^.*/!!;
          }
          return substr($fn, 0, $width) . '...'
              if $width > 0 and length $fn > $width;
