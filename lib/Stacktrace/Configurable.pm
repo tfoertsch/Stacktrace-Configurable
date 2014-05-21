@@ -78,120 +78,120 @@ sub _use_dumper {
         my $arg = $_;
         !!map({ref($arg) =~ /$_/} @{$p->{pkg_dump_re}});
     };
-    return 0;
+    return 1;
 }
 
-my %formatter =
-    (
-     b => sub {
-         my ($I, $frame, $width, $param) = @_;
-         my $nr = $I->{_nr};
-         $width //= 1;
-         if ($param =~ s/^nr!(\d+),//) {
-             return '' unless $nr == $1;
-             $#{$I->{_stack}} = $1 - 1;
-         } elsif ($param =~ s/^nr%(\d+)(?:=(\d+))?,//) {
-             return '' unless $nr % $1 == ($2//0);
-         } elsif ($param =~ s/^nr=(\d+|\$),//) {
-             if ($1 eq '$') {
-                 return '' unless $nr == @{$I->{_stack}};
-             } else {
-                 return '' unless $nr == $1;
-             }
-         }
-         if ($param =~ s/^s=//) {
-             return $param x $width;
-         } else {
-             return +($param eq 'n'
-                      ? "\n"
-                      : $param eq 't'
-                      ? "\t"
-                      : ' ') x $width;
-         }
-     },
-     n => sub {    # frame number
-         my ($I, $frame, $width, $param) = @_;
-         if ($width eq '*') {
-             $width = length '' . (0 + @{$I->{_stack}});
-         } elsif ($width eq '-*') {
-             $width = -length '' . (0 + @{$I->{_stack}});
-         }
-         return sprintf "%${width}d", $I->{_nr};
-     },
-     s => sub {    # subroutine
-         my ($I, $frame, $width, $param) = @_;
-         if (my $eval = $frame->{evaltext}) {
-             return "require $eval" if $frame->{is_require};
-             $eval =~ s/([\\\'])/\\$1/g;
-             return "eval '$eval'";
-         }
-         my $s = $frame->{subroutine};
+sub fmt_b {                     # space & control
+    my ($I, $frame, $width, $param) = @_;
+    my $nr = $I->{_nr};
+    $width //= 1;
+    if ($param =~ s/^nr!(\d+),//) {
+        return '' unless $nr == $1;
+        $#{$I->{_stack}} = $1 - 1;
+    } elsif ($param =~ s/^nr%(\d+)(?:=(\d+))?,//) {
+        return '' unless $nr % $1 == ($2//0);
+    } elsif ($param =~ s/^nr=(\d+|\$),//) {
+        if ($1 eq '$') {
+            return '' unless $nr == @{$I->{_stack}};
+        } else {
+            return '' unless $nr == $1;
+        }
+    }
+    if ($param =~ s/^s=//) {
+        return $param x $width;
+    } else {
+        return +($param eq 'n'
+                 ? "\n"
+                 : $param eq 't'
+                 ? "\t"
+                 : ' ') x $width;
+    }
+}
 
-         for (split /,\s*/, $param) {
-             last if s/^skip_package// and $s =~ s!^.*::!!;
-         }
-         return $s;
-     },
-     a => sub {    # args
-         my ($I, $frame, $width, $param) = @_;
-         return '' unless $frame->{hasargs};
-         my @param = split /,\s*/, $param;
-         my %p;
-         for (@param) {
-             ## no critic
-             $p{dump} = 1,                          next if /^dump$/;
-             $p{pkg_dump}->{$1} = 1,                next if m~^dump=(?!/)(.+)$~;
-             push(@{$p{pkg_dump_re}}, $1),          next if m~^dump=/(.+)/$~;
-             push(@param, split /,\s*/, $ENV{$1}),  next if /^env=(.+)/;
-             $p{deparse} = 1,                       next if /^deparse$/;
-         }
-         return '('.join(', ', map {
-             (!defined $_
-              ? "undef"
-              : _use_dumper (\%p)
-              ? Data::Dumper->new([$_])->Useqq(1)->Deparse($p{deparse} || 0)
-                    ->Indent(0)->Terse(1)->Dump
-              : "$_");
-         } @{$frame->{args}}).')';
-     },
-     f => sub {                # filename
-         my ($I, $frame, $width, $param) = @_;
-         my $fn = $frame->{filename};
-         for (split /,\s*/, $param) {
-             last if s/^skip_prefix=// and $fn =~ s!^\Q$_\E!!;
-             last if s/^basename$// and $fn =~ s!^.*/!!;
-         }
-         return substr($fn, 0, $width) . '...'
-             if $width > 0 and length $fn > $width;
-         return '...' . substr($fn, $width)
-             if $width < 0 and length $fn > -$width;
-         return $fn;
-     },
-     l => sub {                # linenr
-         my ($I, $frame, $width, $param) = @_;
-         return sprintf "%${width}d", $frame->{line};
-     },
-     c => sub {                # context (void/scalar/list)
-         my ($I, $frame, $width, $param) = @_;
-         return (!defined $frame->{wantarray}
-                 ? 'void'
-                 : $frame->{wantarray}
-                 ? 'list'
-                 : 'scalar');
-     },
-     p => sub {                # package
-         my ($I, $frame, $width, $param) = @_;
-         my $pn = $frame->{package};
-         for (split /,\s*/, $param) {
-             last if s/^skip_prefix=// and $pn =~ s!^\Q$_\E!!;
-         }
-         return substr($pn, 0, $width) . '...'
-             if $width > 0 and length $pn > $width;
-         return '...' . substr($pn, $width)
-             if $width < 0 and length $pn > -$width;
-         return $pn;
-     },
-    );
+sub fmt_n {                     # frame number
+    my ($I, $frame, $width, $param) = @_;
+    if ($width eq '*') {
+        $width = length '' . (0 + @{$I->{_stack}});
+    } elsif ($width eq '-*') {
+        $width = -length '' . (0 + @{$I->{_stack}});
+    }
+    return sprintf "%${width}d", $I->{_nr};
+}
+
+sub fmt_s {                     # subroutine
+    my ($I, $frame, $width, $param) = @_;
+    if (my $eval = $frame->{evaltext}) {
+        return "require $eval" if $frame->{is_require};
+        $eval =~ s/([\\\'])/\\$1/g;
+        return "eval '$eval'";
+    }
+    my $s = $frame->{subroutine};
+
+    for (split /,\s*/, $param) {
+        last if s/^skip_package// and $s =~ s!^.*::!!;
+    }
+    return $s;
+}
+
+sub fmt_a {                     # args
+    my ($I, $frame, $width, $param) = @_;
+    return '' unless $frame->{hasargs};
+    my @param = split /,\s*/, $param;
+    my %p;
+    for (@param) {
+        ## no critic
+        $p{dump} = 1,                          next if /^dump$/;
+        $p{pkg_dump}->{$1} = 1,                next if m~^dump=(?!/)(.+)$~;
+        push(@{$p{pkg_dump_re}}, $1),          next if m~^dump=/(.+)/$~;
+        push(@param, split /,\s*/, $ENV{$1}),  next if /^env=(.+)/;
+        $p{deparse} = 1,                       next if /^deparse$/;
+    }
+    return '('.join(', ', map {
+        (!defined $_
+         ? "undef"
+         : _use_dumper (\%p)
+         ? Data::Dumper->new([$_])->Useqq(1)->Deparse($p{deparse} || 0)
+                       ->Indent(0)->Terse(1)->Dump
+         : "$_");
+    } @{$frame->{args}}).')';
+}
+
+sub fmt_f {                     # filename
+    my ($I, $frame, $width, $param) = @_;
+    my $fn = $frame->{filename};
+    for (split /,\s*/, $param) {
+        last if s/^skip_prefix=// and $fn =~ s!^\Q$_\E!!;
+        last if s/^basename$// and $fn =~ s!^.*/!!;
+    }
+    return substr($fn, 0, $width) . '...' if $width > 0 and length $fn > $width;
+    return '...' . substr($fn, $width) if $width < 0 and length $fn > -$width;
+    return $fn;
+}
+
+sub fmt_l {                     # linenr
+    my ($I, $frame, $width, $param) = @_;
+    return sprintf "%${width}d", $frame->{line};
+}
+
+sub fmt_c {                     # context (void/scalar/list)
+    my ($I, $frame, $width, $param) = @_;
+    return (!defined $frame->{wantarray}
+            ? 'void'
+            : $frame->{wantarray}
+            ? 'list'
+            : 'scalar');
+}
+
+sub fmt_p {                     # package
+    my ($I, $frame, $width, $param) = @_;
+    my $pn = $frame->{package};
+    for (split /,\s*/, $param) {
+        last if s/^skip_prefix=// and $pn =~ s!^\Q$_\E!!;
+    }
+    return substr($pn, 0, $width) . '...' if $width > 0 and length $pn > $width;
+    return '...' . substr($pn, $width) if $width < 0 and length $pn > -$width;
+    return $pn;
+}
 
 sub as_string {
     my $I = shift;
@@ -227,7 +227,7 @@ sub as_string {
                        (?:\[(.+?)\])?        # modifiers
                        ([bnasflcp])          # placeholder
                    )
-               /$1 ? $1 : $formatter{$4}->($I, $frame, $2, $3)/gex;
+               /$1 ? $1 : do {my $m="fmt_$4"; $I->$m($frame, $2, $3)}/gex;
         $s .= $l."\n";
     }
     chomp $s;
