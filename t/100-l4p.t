@@ -89,6 +89,9 @@ EOF
 
     l1 sub {1+1}; my $ln=__LINE__;
 
+    my $sub_deparsed = Data::Dumper->new([sub{2}])->Useqq(1)->Terse(1)
+                                   ->Deparse(1)->Indent(0)->Dump;
+
     my $exp=<<"EOF";
 amsg
     ==== START STACK TRACE ===
@@ -99,7 +102,7 @@ amsg
             )
     [2] at t/100-l4p.t line $ln
             l1 (
-                sub {    use warnings;    use strict 'refs';    2;}
+                $sub_deparsed
             )
     === END STACK TRACE ===
 EOF

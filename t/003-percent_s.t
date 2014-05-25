@@ -34,13 +34,14 @@ y(eval)x
 ymain::l4x
 ymain::l5x
 ymain::l6x
-yeval 'l6
-;'x
+yeval 'l6'x
 ymain::l7x
 ymain::l8x
 ymain::l9x
 ymain::l10x
 EOF
+
+    $res=~s/'l6\n;'/'l6'/;
 
     is $res, $exp, '%s';
 }
@@ -57,13 +58,14 @@ y(eval)x
 yl4x
 yl5x
 yl6x
-yeval 'l6
-;'x
+yeval 'l6'x
 yl7x
 yl8x
 yl9x
 yl10x
 EOF
+
+    $res=~s/'l6\n;'/'l6'/;
 
     is $res, $exp, '%[skip_package]s';
 }
