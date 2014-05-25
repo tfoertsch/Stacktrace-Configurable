@@ -3,6 +3,8 @@ package Log::Log4perl::Layout::PatternLayout::Stacktrace;
 use parent 'Stacktrace::Configurable';
 
 use strict;
+use 5.01;
+our $VERSION = '0.01';
 use warnings;
 use Log::Log4perl ();
 use Log::Log4perl::Layout::PatternLayout ();

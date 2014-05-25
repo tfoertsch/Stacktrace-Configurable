@@ -365,12 +365,11 @@ initialize the C<format> attribute if omitted.
 
 The current default format is:
 
+ 'env=STACKTRACE_CONFIG,'.
  '%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.           # header line before the actual stack trace
  '%4b[%*n] at %f line %l%[n]b'.                                   # 4 spaces indentation, the filename and line number and a newline
  '%12b%[skip_package]s %a[env=STACKTRACE_CONFIG_A]%[nr=$,n]b'.    # the called function w/o package and the parameters
  '%[nr=$,s=    === END STACK TRACE ===]b%[nr=$,n]b'               # trailer line after the stack trace
-
-When used by the constructor, C<env=STACKTRACE_CONFIG,> is prepended.
 
 =item $obj->fmt_b
 
@@ -681,6 +680,7 @@ it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Carp>, L<Devel::StackTrace>
+L<Carp>, L<Devel::StackTrace>,
+L<Log::Log4perl::Layout::PatternLayout::Stacktrace>
 
 =cut
