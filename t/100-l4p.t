@@ -52,6 +52,32 @@ EOF
     $app->string('');
 }
 
+{
+    local $ENV{L4P_STACKTRACE_MAX}=4;
+    $app->layout(Log::Log4perl::Layout::PatternLayout->new('a%m%S%n'));
+
+    l10; my $ln=__LINE__;
+
+    my $exp=<<"EOF";
+amsg
+    ==== START STACK TRACE ===
+    [ 1] at t/100-l4p.t line $l1_line
+            __ANON__ ($l, "msg")
+    [ 2] at t/100-l4p.t line @{[$l1_line+1]}
+            l1 ()
+    [ 3] at t/100-l4p.t line @{[$l1_line+2]}
+            l2 ()
+    [ 4] at t/100-l4p.t line @{[$l1_line+3]}
+            l3 ()
+    ... 7 frames cut off
+    === END STACK TRACE ===
+EOF
+    my $res=$app->string;
+
+    is $res, $exp, 'default format with L4P_STACKTRACE_MAX=4';
+    $app->string('');
+}
+
 for my $e (qw/off no 0/) {
     local $ENV{L4P_STACKTRACE}=$e;
     $app->layout(Log::Log4perl::Layout::PatternLayout->new('a%m%Sb'));

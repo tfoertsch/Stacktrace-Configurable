@@ -2,7 +2,7 @@ package Stacktrace::Configurable;
 
 use strict;
 use 5.01;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Stacktrace::Configurable::Frame;
 
@@ -32,8 +32,9 @@ sub default_format {
     ('env=STACKTRACE_CONFIG,'.
      '%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.
      '%4b[%*n] at %f line %l%[n]b'.
-     '%12b%[skip_package]s %[env=STACKTRACE_CONFIG_A]a%[nr=$,n]b'.
-     '%[nr=$,s=    === END STACK TRACE ===]b%[nr=$,n]b');
+     '%12b%[skip_package]s %[env=STACKTRACE_CONFIG_A]a'.
+     '%[nr!STACKTRACE_CONFIG_MAX,c=%n    ... %C frames cut off]b'.
+     '%[nr=$,n]b%[nr=$,s=    === END STACK TRACE ===]b%[nr=$,n]b');
 }
 
 sub get_trace {
@@ -89,9 +90,15 @@ sub fmt_b {                     # space & control
     my ($I, $frame, $width, $param) = @_;
     my $nr = $frame->{nr};
     $width //= 1;
+    my $cutoff;
     if ($param =~ s/^nr!(\d+),//) {
         return '' unless $nr == $1;
-        $#{$I->{frames}} = $1 - 1;
+        $cutoff = @{$I->{frames}} - $nr;
+        $#{$I->{frames}} = $nr - 1;
+    } elsif ($param =~ s/^nr!(\w+),//) {
+        return '' unless length $ENV{$1} and $nr == $ENV{$1};
+        $cutoff = @{$I->{frames}} - $nr;
+        $#{$I->{frames}} = $nr - 1;
     } elsif ($param =~ s/^nr%(\d+)(?:=(\d+))?,//) {
         return '' unless $nr % $1 == ($2//0);
     } elsif ($param =~ s/^nr=(\d+|\$),//) {
@@ -101,7 +108,12 @@ sub fmt_b {                     # space & control
             return '' unless $nr == $1;
         }
     }
-    if ($param =~ s/^s=//) {
+
+    if ($param =~ s/^c=//) {
+        return '' if $cutoff <= 0;
+        $param =~ s/%([Cn])/$1 eq 'C' ? $cutoff : "\n"/ge;
+        return $param x $width;
+    } elsif ($param =~ s/^s=//) {
         return $param x $width;
     } else {
         return +($param eq 'n'
@@ -366,10 +378,11 @@ initialize the C<format> attribute if omitted.
 The current default format is:
 
  'env=STACKTRACE_CONFIG,'.
- '%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.           # header line before the actual stack trace
- '%4b[%*n] at %f line %l%[n]b'.                                   # 4 spaces indentation, the filename and line number and a newline
- '%12b%[skip_package]s %a[env=STACKTRACE_CONFIG_A]%[nr=$,n]b'.    # the called function w/o package and the parameters
- '%[nr=$,s=    === END STACK TRACE ===]b%[nr=$,n]b'               # trailer line after the stack trace
+ '%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.
+ '%4b[%*n] at %f line %l%[n]b'.
+ '%12b%[skip_package]s %[env=STACKTRACE_CONFIG_A]a'.
+ '%[nr!STACKTRACE_CONFIG_MAX,c=%n    ... %C frames cut off]b'.
+ '%[nr=$,n]b%[nr=$,s=    === END STACK TRACE ===]b%[nr=$,n]b'
 
 =item $obj->fmt_b
 
@@ -501,6 +514,24 @@ It is often used with the empty string as what to print, like
  %[nr!10,s=]b
 
 This prints nothing but cuts off the stack trace after the 10th frame.
+
+If the part after the exclamation mark is not a number but matches C<\w+>,
+it is taken as the name of an environment variable. If set and if it is a
+number, that number is taken instead of the literal number above.
+
+In combination with this condition there is another parameter to specify
+the string, C<c=> or the cutoff message. It is printed only if there has
+been cut off at least one frame. Also, the cutoff message can contain C<%n>
+and C<%C> (capital C). The former is replaced by a newline, the latter by
+the number of frames cut off.
+
+This allows for the following pattern:
+
+ %[nr!MAX,c=%ncutting off remaining %C frames]n
+
+Now, let's assume C<$ENV{MAX}=4> but the actual stack is 20 frames deep.
+The specification tells to insert an additional newline for the 4th frame
+followed by the string C<cutting off remaining 16 frames>.
 
 The last condition is C<nr%N> and C<nr%N=M>. It can be used to insert a
 special delimiter after every N stack frames.

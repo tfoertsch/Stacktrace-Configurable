@@ -4,7 +4,7 @@ use parent 'Stacktrace::Configurable';
 
 use strict;
 use 5.01;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use warnings;
 use Log::Log4perl ();
 use Log::Log4perl::Layout::PatternLayout ();
@@ -31,8 +31,9 @@ sub default_format {
     ('env=L4P_STACKTRACE,'.
      '%[nr=1,n]b%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.
      '%4b[%*n] at %f line %l%[n]b'.
-     '%12b%[skip_package]s %[env=L4P_STACKTRACE_A]a%[nr=$,n]b'.
-     '%[nr=$,s=    === END STACK TRACE ===]b');
+     '%12b%[skip_package]s %[env=L4P_STACKTRACE_A]a'.
+     '%[nr!L4P_STACKTRACE_MAX,c=%n    ... %C frames cut off]b'.
+     '%[nr=$,n]b%[nr=$,s=    === END STACK TRACE ===]b');
 }
 
 1;
@@ -136,6 +137,10 @@ Look at frame #2. It does not say C<CODE(...)> as you might expect for a
 subroutine parameter. Instead it deparses the function. Also, if you look at
 the 2nd parameter which is an arrayref. It is dumped with L<Data::Dumper>.
 
+The last environment variable adhered to by the default format is
+C<L4P_STACKTRACE_MAX>. It limits the number of frames printed. If for instance
+set to 5, then only the topmost 5 frames are printed.
+
 See L<StackTrace::Configurable> for more information.
 
 To be precise, the default format is this:
@@ -143,8 +148,9 @@ To be precise, the default format is this:
  'env=L4P_STACKTRACE,'.
  '%[nr=1,n]b%[nr=1,s=    ==== START STACK TRACE ===]b%[nr=1,n]b'.
  '%4b[%*n] at %f line %l%[n]b'.
- '%12b%[skip_package]s %[env=L4P_STACKTRACE_A]a%[nr=$,n]b'.
- '%[nr=$,s=    === END STACK TRACE ===]b'
+ '%12b%[skip_package]s %[env=L4P_STACKTRACE_A]a'.
+ '%[nr!L4P_STACKTRACE_MAX,c=%n    ... %C frames cut off]b'.
+ '%[nr=$,n]b%[nr=$,s=    === END STACK TRACE ===]b'
 
 =head1 AUTHOR
 
