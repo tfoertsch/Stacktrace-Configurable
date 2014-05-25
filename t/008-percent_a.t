@@ -104,4 +104,69 @@ EOF
     is $res, $exp, '%[env=DUMP]a -- DUMP=\'dump=ARRAY, dump=CODE\'';
 }
 
+{
+    local $ENV{DUMP}='dump=/trace/, dump=CODE';
+    $trace->format='y%[env=DUMP]ax';
+    l1 (my $obj=Stacktrace::Configurable->new(format=>'%l'),
+        my $arr=[43], my $hash={p=>101}, my $sub=sub{19});
+
+    my $exp=<<"EOF"; chomp $exp;
+y(bless( {"format" => "%l"}, 'Stacktrace::Configurable' ), $arr, $hash, sub { "DUMMY" })x
+EOF
+
+    is $res, $exp, '%[env=DUMP]a -- DUMP=\'dump=/trace/, dump=CODE\'';
+}
+
+
+{
+    $trace->format='y%[multiline]ax';
+    l1 (my $obj=Stacktrace::Configurable->new(format=>'%l'),
+        my $arr=[43], my $hash={p=>101}, my $sub=sub{19});
+
+    my $exp=<<"EOF"; chomp $exp;
+y(
+        $obj,
+        $arr,
+        $hash,
+        $sub
+    )x
+EOF
+
+    is $res, $exp, '%[multiline]a';
+}
+
+{
+    $trace->format='y%[multiline=6]ax';
+    l1 (my $obj=Stacktrace::Configurable->new(format=>'%l'),
+        my $arr=[43], my $hash={p=>101}, my $sub=sub{19});
+
+    my $exp=<<"EOF"; chomp $exp;
+y(
+          $obj,
+          $arr,
+          $hash,
+          $sub
+      )x
+EOF
+
+    is $res, $exp, '%[multiline=6]a';
+}
+
+{
+    $trace->format='%s %[multiline=6.2]ax';
+    l1 (my $obj=Stacktrace::Configurable->new(format=>'%l'),
+        my $arr=[43], my $hash={p=>101}, my $sub=sub{19});
+
+    my $exp=<<"EOF"; chomp $exp;
+main::l1 (
+        $obj,
+        $arr,
+        $hash,
+        $sub
+      )x
+EOF
+
+    is $res, $exp, '%[multiline=6.2]a';
+}
+
 done_testing;

@@ -35,13 +35,13 @@ EOF
     is $res, $exp, 'default format with STACKTRACE_CONFIG=undef';
 }
 
-for my $e (qw/off 0/) {
+for my $e (qw/off no 0/) {
     local $ENV{STACKTRACE_CONFIG}=$e;
     l2; my $ln=__LINE__;
     is $res, '', 'default format with STACKTRACE_CONFIG='.$e;
 }
 
-for my $e (qw/on 1/) {
+for my $e (qw/on yes 1/) {
     local $ENV{STACKTRACE_CONFIG}=$e;
 
     l2; my $ln=__LINE__;
@@ -56,6 +56,35 @@ EOF
     $exp=~s/\{(?:L(\d+)|B)LINE\}/defined $1 ? $l1_line+$1+1 : $ln/ge;
 
     is $res, $exp, 'default format with STACKTRACE_CONFIG='.$e;
+}
+
+{
+    $trace->format('env=XX');
+    local $ENV{XX}='%[basename]f(%l)';
+
+    l2; my $ln=__LINE__;    my $exp=<<'EOF';
+000-basic.t({L1LINE})
+000-basic.t({BLINE})
+EOF
+    $exp=~s/\{(?:L(\d+)|B)LINE\}/defined $1 ? $l1_line+$1+1 : $ln/ge;
+    chomp $exp;
+
+    is $res, $exp, 'format env=XX';
+}
+
+{
+    $trace->format('env=XX');
+    local $ENV{XX}='env=YY';
+    local $ENV{YY}='env=XX';
+
+    l2; my $ln=__LINE__;    my $exp=<<'EOF';
+format cycle detected
+format cycle detected
+EOF
+    $exp=~s/\{(?:L(\d+)|B)LINE\}/defined $1 ? $l1_line+$1+1 : $ln/ge;
+    chomp $exp;
+
+    is $res, $exp, 'format cycle XX => YY => XX';
 }
 
 done_testing;

@@ -4,10 +4,6 @@ use strict;
 use 5.01;
 our $VERSION = '0.01';
 
-use Scalar::Util qw/looks_like_number/;
-use Data::Dumper ();
-no warnings 'uninitialized';    ## no critic
-
 our @attr;
 
 sub new {
@@ -24,7 +20,7 @@ sub new {
 BEGIN {
     @attr=(qw/package filename line subroutine hasargs
               wantarray evaltext is_require hints bitmask
-              hinthash args/);
+              hinthash nr args/);
     for (@attr) {
         my $attr=$_;
         no strict 'refs';
@@ -37,4 +33,3 @@ BEGIN {
 }
 
 1;
-
