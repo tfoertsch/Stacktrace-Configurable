@@ -1,5 +1,5 @@
 {
-   "abstract" : "Blah blah blah",
+   "abstract" : "a configurable Perl stack trace",
    "author" : [
       "Torsten Förtsch <torsten.foertsch@gmx.net>"
    ],
@@ -36,7 +36,9 @@
       },
       "runtime" : {
          "requires" : {
-            "perl" : "5.008005"
+            "Data::Dumper" : "2.130_02",
+            "Log::Log4perl" : "1.29",
+            "perl" : "5.010"
          }
       },
       "test" : {
@@ -46,6 +48,20 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.01"
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/tfoertsch/Stacktrace-Configurable/issues"
+      },
+      "homepage" : "https://github.com/tfoertsch/Stacktrace-Configurable",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/tfoertsch/Stacktrace-Configurable.git",
+         "web" : "https://github.com/tfoertsch/Stacktrace-Configurable"
+      }
+   },
+   "version" : "0.01",
+   "x_contributors" : [
+      "Torsten Förtsch <torsten@binary.com>"
+   ]
 }
 
