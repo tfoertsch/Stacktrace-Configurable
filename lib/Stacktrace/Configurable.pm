@@ -2,7 +2,7 @@ package Stacktrace::Configurable;
 
 use strict;
 use 5.01;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Stacktrace::Configurable::Frame;
 
