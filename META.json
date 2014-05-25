@@ -59,7 +59,7 @@
          "web" : "https://github.com/tfoertsch/Stacktrace-Configurable"
       }
    },
-   "version" : "0.01",
+   "version" : "0.02",
    "x_contributors" : [
       "Torsten Förtsch <torsten@binary.com>"
    ]
