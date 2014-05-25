@@ -1,4 +1,5 @@
-package t005_l2;
+package                         # hide from CPAN
+    t005_l2;
 use strict;
 use warnings;
 
