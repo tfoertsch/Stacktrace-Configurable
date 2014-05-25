@@ -158,7 +158,7 @@ sub fmt_a {                     # args
              ? "undef"
              : _use_dumper (\%p)
              ? Data::Dumper->new([$_])->Useqq(1)->Deparse($p{deparse} || 0)
-             ->Indent(0)->Terse(1)->Dump
+                           ->Indent(0)->Terse(1)->Dump
              : "$_");
         } @{$frame->{args}})."\n".(' 'x$ml[0]).")";
     } else {
@@ -167,7 +167,7 @@ sub fmt_a {                     # args
              ? "undef"
              : _use_dumper (\%p)
              ? Data::Dumper->new([$_])->Useqq(1)->Deparse($p{deparse} || 0)
-             ->Indent(0)->Terse(1)->Dump
+                           ->Indent(0)->Terse(1)->Dump
              : "$_");
         } @{$frame->{args}}).')';
     }

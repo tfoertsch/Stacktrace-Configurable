@@ -1,6 +1,7 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+        - fix various perl-version dependent tests
 
 0.01  2014-05-25 14:11:00 UTC
         - Initial release
