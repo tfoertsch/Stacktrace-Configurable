@@ -1,6 +1,8 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+
+0.03  2014-05-25 19:36:19 UTC
         - frame limit and cutoff message
 
 0.02  2014-05-25 14:59:38 UTC
