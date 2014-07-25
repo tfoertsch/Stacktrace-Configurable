@@ -4,7 +4,7 @@ use parent 'Stacktrace::Configurable';
 
 use strict;
 use 5.01;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use warnings;
 use Log::Log4perl ();
 use Log::Log4perl::Layout::PatternLayout ();

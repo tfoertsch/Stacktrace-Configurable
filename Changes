@@ -1,6 +1,7 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+        - document and test recursion prevention
 
 0.04  2014-07-25 07:21:44 UTC
         - prevent recursion in L4P
