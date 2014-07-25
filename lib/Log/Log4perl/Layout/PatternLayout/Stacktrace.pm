@@ -155,6 +155,20 @@ To be precise, the default format is this:
  '%[nr!L4P_STACKTRACE_MAX,c=%n    ... %C frames cut off]b'.
  '%[nr=$,n]b%[nr=$,s=    === END STACK TRACE ===]b'
 
+=head2 Overloaded C<"">, tied variables etc.
+
+Stack traces are often used in combination with exceptions. Further, in Perl
+operators can be overloaded. This module uses the C<""> operator to stringify
+variables. What happens if this operator is overloaded and the overloading
+function itself dies triggering a new stack trace? In that case we see
+infinite recursion. You might argue that stringifying code that dies is a
+bug by itself and I agree. Though, it does not hurt to forbid this kind
+of recursion.
+
+So, if you see in your expected stacktrace somewhere the string
+C<(recursion detected)>, that's the reason. A recursing stacktrace has been
+disrupted.
+
 =head1 AUTHOR
 
 Torsten Förtsch E<lt>torsten.foertsch@gmx.netE<gt>
