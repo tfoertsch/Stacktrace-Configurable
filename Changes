@@ -1,6 +1,8 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+
+0.05  2014-07-25 10:30:00 UTC
         - document and test recursion prevention
 
 0.04  2014-07-25 07:21:44 UTC
