@@ -1,6 +1,7 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+        - prevent recursion in L4P
 
 0.03  2014-05-25 19:36:19 UTC
         - frame limit and cutoff message

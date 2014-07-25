@@ -86,7 +86,6 @@ EOF
 000-basic.t(@{[$l1_line+1]})
 000-basic.t($ln)
 EOF
-    $exp=~s/\{(?:L(\d+)|B)LINE\}/defined $1 ? $l1_line+$1+1 : $ln/ge;
     chomp $exp;
 
     is $res, $exp, 'format env=XX';
@@ -101,7 +100,6 @@ EOF
 format cycle detected
 format cycle detected
 EOF
-    $exp=~s/\{(?:L(\d+)|B)LINE\}/defined $1 ? $l1_line+$1+1 : $ln/ge;
     chomp $exp;
 
     is $res, $exp, 'format cycle XX => YY => XX';

@@ -4,12 +4,15 @@ use parent 'Stacktrace::Configurable';
 
 use strict;
 use 5.01;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use warnings;
 use Log::Log4perl ();
 use Log::Log4perl::Layout::PatternLayout ();
 
 sub cspec {
+    our $recursion;
+    return '(recursion detected)' if $recursion;
+    local $recursion=1;
     __PACKAGE__->new(format=>$_[0]->{curlies})->get_trace->as_string;
 }
 
