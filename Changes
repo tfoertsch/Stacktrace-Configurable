@@ -1,6 +1,8 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+
+0.06  2014-08-04 05:44:26 UTC
         - add build-debian-package
 
 0.05  2014-07-25 10:30:00 UTC
