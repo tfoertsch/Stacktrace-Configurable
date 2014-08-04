@@ -1,6 +1,7 @@
 Revision history for Stacktrace-Configurable
 
 {{$NEXT}}
+        - add build-debian-package
 
 0.05  2014-07-25 10:30:00 UTC
         - document and test recursion prevention
