@@ -26,7 +26,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.036"
+            "Module::Build::Tiny" : "0.037"
          }
       },
       "develop" : {
@@ -59,7 +59,7 @@
          "web" : "https://github.com/tfoertsch/Stacktrace-Configurable"
       }
    },
-   "version" : "0.05",
+   "version" : "0.06",
    "x_contributors" : [
       "Torsten Förtsch <torsten@binary.com>"
    ]

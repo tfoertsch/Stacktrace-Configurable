@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/tfoertsch/Stacktrace-Configurable.svg?branch=master)](https://travis-ci.org/tfoertsch/Stacktrace-Configurable)
-
 # NAME
 
 Stacktrace::Configurable - a configurable Perl stack trace
